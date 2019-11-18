@@ -1,0 +1,1 @@
+1. ejecute program.out
