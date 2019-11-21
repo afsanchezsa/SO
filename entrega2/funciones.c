@@ -13,8 +13,9 @@
 #include <netinet/in.h>
 #include <pthread.h>
 //#include <curses.h>
-
-
+#define PORT 3535
+#define BACKLOG 32
+#define NUMHILOS 32
 #define tam 100151
 char minuscula[33];
 
@@ -464,4 +465,5 @@ void EliminarMascota(int posicion){
   numero_mascotas--;
 }
 
+int serverfd,clientfd,r;
 

@@ -1,37 +1,40 @@
 #include "funciones.c"
-
+char * mensaje_confirmacion;
+char *mensaje_accion_realizada;
+char *mensaje_ocupado;
 /////server
+struct cliente{
+  int clientfd;
+  int numhilo;
+};
 void * funcion(void *ap){
-int *clientdf=(int *)ap;
+  
+struct cliente * currentClient =(struct cliente *)ap;
 
 int opcion;
 int r;
-r=send(*clientdf,"conexion establecida",20,0);
+r=send(currentClient->clientfd,mensaje_confirmacion,sizeof(char)*15,0);
 
-do{
- r=recv(serverfd,&opcion,sizeof(int),0);
-    printf("el cliente escogio %i",opcion);
-break;
-  if(opcion==1){
-      
-    
-  }else if(opcion==2){
-}else if(opcion==3){
-  
-  }else if(opcion ==4){
-    
-  }else {
-    
-    break;
-  }
- 
+r=recv(currentClient->clientfd,&opcion,sizeof(int),0);
 
-}while(1>0);
-
+printf("elcliente escogio : %i",opcion);
 
 
 
 }
+
+int HILODISPONIBLE[NUMHILOS];
+int NumeroHiloDisponible(){
+  int a=0;
+
+  for(a=0;a<NUMHILOS;a++){
+    if(HILODISPONIBLE[a]==1){
+      return a;
+    }
+  }
+  return -1;
+}
+
 
 int main(){
   int opcion;
@@ -51,14 +54,17 @@ int main(){
         perror("error en el malloc");
         exit(-1);
   } 
-  
-  
-  char *mensaje_accion_realizada=(char *)malloc(sizeof(char)*15);
+  int i=0;
+  for(i=0;i<NUMHILOS;i++){
+    HILODISPONIBLE[i]=1;//si esta en 1 esta disponible
+  }
+  mensaje_accion_realizada=(char *)malloc(sizeof(char)*15);
   mensaje_accion_realizada="accion realizada\n";
-char *mensaje_confirmacion=(char*)malloc(sizeof(char)*15);
+mensaje_confirmacion=(char*)malloc(sizeof(char)*15);
 mensaje_confirmacion="establecida\n"; 
-  
- pthread_t tfd[NUMHILOS];
+mensaje_ocupado=(char*)malloc(sizeof(char)*15);
+mensaje_ocupado="NO CONECTADO\n";
+ pthread_t hilos[NUMHILOS];
 
       ///init
       int clientfd,r;
@@ -87,18 +93,31 @@ if(r==-1){
     exit(-1);
 }
 
+//do{
 clientfd=accept(serverfd,(struct sockaddr *)&client,&len);
 if(clientfd==-1){
     perror("error en el accept");
     exit(-1);
 }
-
-
-r=send(clientfd,mensaje_confirmacion,sizeof(char)*15,0);
+struct cliente *currentClient=(struct cliente *)malloc(sizeof(struct cliente));
+currentClient->clientfd=clientfd;
+if(NumeroHiloDisponible()==-1){//no se pueden aceptar mas hilos 
+r=send(clientfd,mensaje_ocupado,sizeof(char)*15,0);
 if(r==-1){
   perror("error en send");
 }
+}else{
+  currentClient->numhilo=NumeroHiloDisponible();
+  HILODISPONIBLE[currentClient->numhilo]=0;
 
+pthread_create(&hilos[currentClient->numhilo],NULL,funcion,currentClient);
+}
+
+    pthread_join(hilos[0],NULL);
+//}while(1>0);
+
+
+/*
 r=recv(clientfd,&opcion,sizeof(int),0);
 
 
@@ -170,7 +189,7 @@ r=close(serverfd);
 
   CambiarTamanioBd(numero_mascotas);
   GuardarTablaHash();
-
+*/
   
   return 0;
 }
