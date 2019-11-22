@@ -9,6 +9,8 @@ struct cliente{
   int numhilo;
 };
 int HILODISPONIBLE[NUMHILOS];
+
+int numclientesactual;
 void * funcion(void *ap){
   
 struct cliente * currentClient =(struct cliente *)ap;
@@ -82,6 +84,9 @@ r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
      r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
   }else {
      r=send(currentClient->clientfd,mensaje_despedida,sizeof(char)*33,0);
+      CambiarTamanioBd(numero_mascotas);
+    GuardarTablaHash();
+    
     break;
   }
 
@@ -91,6 +96,7 @@ r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
 close(currentClient->clientfd);
 HILODISPONIBLE[currentClient->numhilo]=1;
 numclientesactual--;
+
 }
 
 
@@ -105,7 +111,6 @@ int NumeroHiloDisponible(){
   return -1;
 }
 
-int numclientesactual;
 int main(){
   numclientesactual=0;
   int opcion;
@@ -144,6 +149,8 @@ mensaje_despedida="ADIOS\n";
 struct sockaddr_in server,client;
 socklen_t len;
 serverfd=socket(AF_INET,SOCK_STREAM,0);
+int conf = 1;
+setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR, &conf, sizeof(conf));
 if(serverfd==-1){
     perror("error en el socket");
     exit(-1);
