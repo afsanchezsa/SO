@@ -1,7 +1,1 @@
-NOMBRE:juanpablo
-TIPO:1
-EDAD:1
-RAZA:1
-ESTATURA:1
-PESO:1.000000
-SEXO:1
+mascota jejeje uy estoy en descargas

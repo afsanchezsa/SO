@@ -59,9 +59,14 @@ if(opcion==1){
 	  
 	  }
 	  fclose(clinichistory);
+    r=send(currentClient->clientfd,archivo,sizeof(char)*33,0);//envia nombre del archivo
+    EnviarArchivo(currentClient->clientfd,archivo);
 	 // free(clinichistory); descomentar haber si funciona
-      char *path=concat(s1,".txt");
-      system(path);
+     RecibirArchivo(currentClient->clientfd,archivo);
+     
+     
+     // char *path=concat(s1,".txt");
+      //system(path);
 r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
   }}else if(opcion==3){
     //printf("el numero de registros presentes es: %i \n",numero_mascotas);
@@ -150,7 +155,7 @@ struct sockaddr_in server,client;
 socklen_t len;
 serverfd=socket(AF_INET,SOCK_STREAM,0);
 int conf = 1;
-setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR, &conf, sizeof(conf));
+setsockopt(serverfd, SOL_SOCKET, SO_REUSEADDR, &conf, sizeof(conf));//configuracion para liberar la direccion al terminar el programa
 if(serverfd==-1){
     perror("error en el socket");
     exit(-1);
