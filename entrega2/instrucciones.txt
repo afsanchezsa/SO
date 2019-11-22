@@ -1,0 +1,9 @@
+ si desea correrlo sin insertar niguna mascota preliminarmente:
+1.ejecute resetAll.c
+2 abra la consola y digite touch dataDogs.dat
+3 ejecute el servidor en la consola con el comando gcc p2-dogServer.c -lpthread y ./a.out
+4 ejecute los clientes en la consola con el comando gcc p2-dogClient.c y luego ./a.out
+5 si desea dejar de ejecutar el servidor haga cntrl c en la consola del servidor luego de salir con la opcion 5 en todos los clientes.
+
+ 
+
