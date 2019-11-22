@@ -2,6 +2,7 @@
 
 int main(){
 char mensaje[33];
+char filename[33];
   int clientfd,r;
 struct sockaddr_in client;
 socklen_t len;
@@ -64,7 +65,16 @@ r=send(clientfd,&opcion,sizeof(int),0);
     char decision;
     scanf(" %c",&decision);
     r=send(clientfd,&decision,sizeof(char),0);
-     r=recv(clientfd,mensaje,sizeof(char)*33,0);
+    
+    if(decision=='S'|| decision=='s'){
+      r=recv(clientfd,filename,sizeof(char)*33,0);
+      RecibirArchivo(clientfd,filename);
+      system(concat("gedit ",filename));
+    EnviarArchivo(clientfd,filename);
+   
+    }
+    
+      r=recv(clientfd,mensaje,sizeof(char)*33,0);
       printf("%s",mensaje);
    
    }else if(opcion==3){

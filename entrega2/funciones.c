@@ -514,3 +514,76 @@ r=send(clientfd,&buscado->mascota,sizeof(struct dogType),0);
   }
   
 }
+
+
+void EnviarArchivo(int descriptor,char * filename){
+
+
+
+    FILE *fptr1; 
+   char c;
+  
+    fptr1 = fopen(filename, "r"); 
+    if (fptr1 == NULL) 
+    { 
+        printf("Cannot open file %s \n", filename); 
+        exit(0); 
+    } 
+
+     //r=send(descriptor,filename,sizeof(char)*33,0);
+   
+    do
+    {   c = fgetc(fptr1);
+     
+        r=send(descriptor,&c,sizeof(char),0); 
+        
+    } while (c != EOF) ;
+  
+
+  
+    fclose(fptr1); 
+   
+
+
+}
+
+void RecibirArchivo(int descriptor,char * filename){
+
+    FILE  *fptr2; 
+    char  c; 
+   // char filename[33];
+  
+    //r=recv(clientfd,filename,sizeof(char)*33,0);
+    fptr2 = fopen(filename, "w"); 
+    if (fptr2 == NULL) 
+    { 
+        printf("Cannot open file %s \n", filename); 
+        exit(0); 
+    } 
+  
+     
+  
+   
+    r=recv(descriptor,&c,sizeof(char),0);
+    
+    while (c != EOF) 
+    { 
+        fputc(c, fptr2); 
+         r=recv(descriptor,&c,sizeof(char),0);
+    } 
+  
+    
+   
+
+  //system(concat("gedit ",filename));
+   
+    fclose(fptr2); 
+
+
+    
+
+
+
+
+}
+
