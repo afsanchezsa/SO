@@ -2,28 +2,98 @@
 char * mensaje_confirmacion;
 char *mensaje_accion_realizada;
 char *mensaje_ocupado;
+char *mensaje_despedida;
 /////server
 struct cliente{
   int clientfd;
   int numhilo;
 };
+int HILODISPONIBLE[NUMHILOS];
 void * funcion(void *ap){
   
 struct cliente * currentClient =(struct cliente *)ap;
 
 int opcion;
 int r;
-r=send(currentClient->clientfd,mensaje_confirmacion,sizeof(char)*15,0);
+r=send(currentClient->clientfd,mensaje_confirmacion,sizeof(char)*33,0);
 
+do{
 r=recv(currentClient->clientfd,&opcion,sizeof(int),0);
 
-printf("elcliente escogio : %i",opcion);
+if(opcion==1){
+      struct dogType *insertado=(struct dogType *)malloc(sizeof(struct dogType));
+      
+      r=recv(currentClient->clientfd,insertado,sizeof(struct dogType),0);
+      GuardarMascota(insertado,0);
+    free(insertado);
+    r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
+  }else if(opcion==2){
+   // printf("el numero de registros presentes es: %i \n",numero_mascotas);
+    r=send(currentClient->clientfd,&numero_mascotas,sizeof(int),0);
+    
+    int numregistro;
+    r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
+    //printf("Desea abrir la historia clinica de la mascota? (S/N)");
+    char decision;
+    r=recv(currentClient->clientfd,&decision,sizeof(char),0);
+    if(decision=='S'|| decision=='s'){
+      por_revisar=LeerdeBD(numregistro-1);
+      char* seq=concat(por_revisar->mascota.nombre,por_revisar->mascota.raza);
+      char *s1=concat("gedit ",seq);
+	  char * archivo=concat(seq,".txt");
+	  FILE * clinichistory=fopen(archivo,"r");
+	  if(clinichistory==NULL){
+	  clinichistory=fopen(archivo,"w");
+	  fprintf(clinichistory,"NOMBRE:%s\nTIPO:%s\nEDAD:%i\nRAZA:%s\nESTATURA:%i\nPESO:%lf\nSEXO:%c\n",
+	  por_revisar->mascota.nombre,
+	  por_revisar->mascota.tipo,
+	  por_revisar->mascota.edad,
+	  por_revisar->mascota.raza,
+	  por_revisar->mascota.estatura,
+	  por_revisar->mascota.peso,
+	  por_revisar->mascota.sexo
+	  
+	  );
+	  
+	  }
+	  fclose(clinichistory);
+	 // free(clinichistory); descomentar haber si funciona
+      char *path=concat(s1,".txt");
+      system(path);
+r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
+  }}else if(opcion==3){
+    //printf("el numero de registros presentes es: %i \n",numero_mascotas);
+    r=send(currentClient->clientfd,&numero_mascotas,sizeof(int),0);
+    //printf("por favor seleccione el numero de registro que desea eliminar : ");
+    int numregistro;
+    r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
+    EliminarMascota(numregistro-1);
+    r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
+  }else if(opcion ==4){
+   // printf("inserte el nombre por favor");
+    char *nombre=(char *)malloc(sizeof(char)*33);
+    //toLower(nombre);
+    if (nombre == NULL){
+        perror("erroren el malloc");
+        exit(-1);
+    } 
+    r=recv(currentClient->clientfd,nombre,sizeof(char)*33,0);
+    BuscarPorNombreyEnviaraCliente(nombre,0,currentClient->clientfd);
+     r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
+  }else {
+     r=send(currentClient->clientfd,mensaje_despedida,sizeof(char)*33,0);
+    break;
+  }
 
 
+}while(1>0);
 
+close(currentClient->clientfd);
+HILODISPONIBLE[currentClient->numhilo]=1;
+numclientesactual--;
 }
 
-int HILODISPONIBLE[NUMHILOS];
+
 int NumeroHiloDisponible(){
   int a=0;
 
@@ -35,8 +105,9 @@ int NumeroHiloDisponible(){
   return -1;
 }
 
-
+int numclientesactual;
 int main(){
+  numclientesactual=0;
   int opcion;
   double peso;
   bool salir=false;
@@ -58,12 +129,14 @@ int main(){
   for(i=0;i<NUMHILOS;i++){
     HILODISPONIBLE[i]=1;//si esta en 1 esta disponible
   }
-  mensaje_accion_realizada=(char *)malloc(sizeof(char)*15);
+  mensaje_accion_realizada=(char *)malloc(sizeof(char)*33);
   mensaje_accion_realizada="accion realizada\n";
-mensaje_confirmacion=(char*)malloc(sizeof(char)*15);
+mensaje_confirmacion=(char*)malloc(sizeof(char)*33);
 mensaje_confirmacion="establecida\n"; 
-mensaje_ocupado=(char*)malloc(sizeof(char)*15);
+mensaje_ocupado=(char*)malloc(sizeof(char)*33);
 mensaje_ocupado="NO CONECTADO\n";
+mensaje_despedida=(char*)malloc(sizeof(char)*33);
+mensaje_despedida="ADIOS\n";
  pthread_t hilos[NUMHILOS];
 
       ///init
@@ -93,12 +166,14 @@ if(r==-1){
     exit(-1);
 }
 
-//do{
-clientfd=accept(serverfd,(struct sockaddr *)&client,&len);
+do{
+  
+  clientfd=accept(serverfd,(struct sockaddr *)&client,&len);
 if(clientfd==-1){
     perror("error en el accept");
     exit(-1);
 }
+numclientesactual++;
 struct cliente *currentClient=(struct cliente *)malloc(sizeof(struct cliente));
 currentClient->clientfd=clientfd;
 if(NumeroHiloDisponible()==-1){//no se pueden aceptar mas hilos 
@@ -109,12 +184,22 @@ if(r==-1){
 }else{
   currentClient->numhilo=NumeroHiloDisponible();
   HILODISPONIBLE[currentClient->numhilo]=0;
-
+printf("%i",currentClient->numhilo);
 pthread_create(&hilos[currentClient->numhilo],NULL,funcion,currentClient);
 }
+/*  int finhilo;
+bool hay_hilos_presentes=true;
+while(hay_hilos_presentes){
+  
+for(finhilo=0;finhilo<NUMHILOS;finhilo++){
+hay_hilos_presentes=HILODISPONIBLE[finhilo]==1&&hay_hilos_presentes;
 
-    pthread_join(hilos[0],NULL);
-//}while(1>0);
+}
+
+} */
+
+
+}while(numclientesactual>0);
 
 
 /*
@@ -190,7 +275,9 @@ r=close(serverfd);
   CambiarTamanioBd(numero_mascotas);
   GuardarTablaHash();
 */
-  
+  r=close(serverfd);
+  CambiarTamanioBd(numero_mascotas);
+  GuardarTablaHash();
   return 0;
 }
 

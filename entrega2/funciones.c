@@ -466,4 +466,51 @@ void EliminarMascota(int posicion){
 }
 
 int serverfd,clientfd,r;
+void IntegerToString(int entero, char * cadena){
 
+
+sprintf(cadena, "%d", entero);
+}
+void BuscarPorNombreyEnviaraCliente( char *nombre,int i,int clientfd){
+  int index=(hash(toLower(nombre))+sondeo(i))%tam;
+  int nextIndex;
+
+  if(tablahash[index]!=-1&&tablahash[index]!=-2&&Colisiona(nombre,tablahash[index])<0){//Hay algo en esa posición
+    struct Nodo * buscado=(struct Nodo *)malloc(sizeof(struct Nodo));
+    if (buscado == NULL){
+        perror("error en el malloc");
+        exit(-1);
+    } 
+    bd=bdLectura();
+    buscado=LeerdeBD(tablahash[index]);
+    //printf("/////////////////\n");
+    int indic=tablahash[index]+1;
+     r=send(clientfd,&indic,sizeof(int),0);
+       
+//    printf("ID: %i \n",tablahash[index]+1);
+r=send(clientfd,&buscado->mascota,sizeof(struct dogType),0);
+    //ImprimirEstructura(&buscado->mascota);
+    nextIndex=buscado->anterior;
+
+    while(nextIndex!=-1){//lee la lista 
+      buscado=LeerdeBD(nextIndex);
+      //printf("/////////////////\n");
+      indic=nextIndex+1;
+       r=send(clientfd,&indic,sizeof(int),0);
+      //printf("ID: %i\n",nextIndex+1);
+      r=send(clientfd,&buscado->mascota,sizeof(struct dogType),0);
+     // ImprimirEstructura(&buscado->mascota);
+      nextIndex=buscado->anterior;
+      
+    }
+    int codigoTerminado=-5;
+     r=send(clientfd,&codigoTerminado,sizeof(int),0);
+  }else if(tablahash[index]==-2||Colisiona(nombre,tablahash[index])>0){//bsca con un sondeo diferente
+    return BuscarPorNombreyEnviaraCliente(nombre,i+1,clientfd);
+  }else{
+    int codigoNohayElementos=-4;
+     r=send(clientfd,&codigoNohayElementos,sizeof(int),0);
+    //printf("lo sentimos no se han encontrado resultados");  
+  }
+  
+}
