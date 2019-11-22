@@ -67,8 +67,11 @@ if(opcion==1){
      
      // char *path=concat(s1,".txt");
       //system(path);
-r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
-  }}else if(opcion==3){
+
+  }
+  r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
+  
+  }else if(opcion==3){
     //printf("el numero de registros presentes es: %i \n",numero_mascotas);
     r=send(currentClient->clientfd,&numero_mascotas,sizeof(int),0);
     //printf("por favor seleccione el numero de registro que desea eliminar : ");

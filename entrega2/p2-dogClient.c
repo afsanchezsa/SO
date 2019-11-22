@@ -69,10 +69,12 @@ r=send(clientfd,&opcion,sizeof(int),0);
     if(decision=='S'|| decision=='s'){
       r=recv(clientfd,filename,sizeof(char)*33,0);
       RecibirArchivo(clientfd,filename);
-    }
-    system(concat("gedit ",filename));
+      system(concat("gedit ",filename));
     EnviarArchivo(clientfd,filename);
-     r=recv(clientfd,mensaje,sizeof(char)*33,0);
+   
+    }
+    
+      r=recv(clientfd,mensaje,sizeof(char)*33,0);
       printf("%s",mensaje);
    
    }else if(opcion==3){
