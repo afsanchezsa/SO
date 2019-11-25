@@ -1,4 +1,6 @@
 #include "funciones.c"
+#include "log.c"
+
 char * mensaje_confirmacion;
 char *mensaje_accion_realizada;
 char *mensaje_ocupado;
@@ -7,6 +9,7 @@ char *mensaje_despedida;
 struct cliente{
   int clientfd;
   int numhilo;
+  char * ip;
 };
 int HILODISPONIBLE[NUMHILOS];
 
@@ -21,13 +24,19 @@ r=send(currentClient->clientfd,mensaje_confirmacion,sizeof(char)*33,0);
 
 do{
 r=recv(currentClient->clientfd,&opcion,sizeof(int),0);
-
+struct Log * log=(struct Log *)malloc(sizeof(struct Log));
 if(opcion==1){
       struct dogType *insertado=(struct dogType *)malloc(sizeof(struct dogType));
       
       r=recv(currentClient->clientfd,insertado,sizeof(struct dogType),0);
       GuardarMascota(insertado,0);
     free(insertado);
+    //warning("esto es una alerta");
+    
+    log->opcion=opcion;
+    log->registro=numero_mascotas;
+    log->ip=currentClient->ip;
+    writelog(log);
     r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
   }else if(opcion==2){
    // printf("el numero de registros presentes es: %i \n",numero_mascotas);
@@ -67,6 +76,10 @@ if(opcion==1){
      
      // char *path=concat(s1,".txt");
       //system(path);
+      log->opcion=opcion;
+      log->registro=numregistro;
+      log->ip=currentClient->ip;
+      writelog(log);
 
   }
   r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
@@ -78,6 +91,11 @@ if(opcion==1){
     int numregistro;
     r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
     EliminarMascota(numregistro-1);
+    log->opcion=opcion;
+      log->registro=numregistro;
+      log->ip=currentClient->ip;
+      writelog(log);
+
     r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
   }else if(opcion ==4){
    // printf("inserte el nombre por favor");
@@ -89,6 +107,11 @@ if(opcion==1){
     } 
     r=recv(currentClient->clientfd,nombre,sizeof(char)*33,0);
     BuscarPorNombreyEnviaraCliente(nombre,0,currentClient->clientfd);
+     log->opcion=opcion;
+      log->cadena_buscada=nombre;
+      log->ip=currentClient->ip;
+      writelog(log);
+
      r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
   }else {
      r=send(currentClient->clientfd,mensaje_despedida,sizeof(char)*33,0);
@@ -199,7 +222,9 @@ if(r==-1){
 }else{
   currentClient->numhilo=NumeroHiloDisponible();
   HILODISPONIBLE[currentClient->numhilo]=0;
-printf("%i",currentClient->numhilo);
+//printf("%i",currentClient->numhilo);
+currentClient->ip=inet_ntoa(client.sin_addr);
+//printf("%s",currentClient->ip);
 pthread_create(&hilos[currentClient->numhilo],NULL,funcion,currentClient);
 }
 /*  int finhilo;
