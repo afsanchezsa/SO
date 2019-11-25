@@ -6,5 +6,9 @@
 5 si desea dejar de ejecutar el servidor haga cntrl c en la consola del servidor luego de salir con la opcion 5 en todos los clientes.
 NOTA: si desea que los clientes sean remotos entonces copie y pegue el archivo p2-dogClient.c junto con funciones.c en la carpeta desde donde desa usarlos y alli ejecute el archivo p2-dogClient.c
 
+NOTA: los pasos del 3 en adelante pueden resumirse abriendo la consola y digitando make
+posteriormente para encender el servidor hacer ./p2-dogServer y para agregar un cliente hacer ./p2-dogClient
+
+
  
 
