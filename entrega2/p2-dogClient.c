@@ -57,9 +57,13 @@ r=send(clientfd,&opcion,sizeof(int),0);
   }else if(opcion==2){
     r=recv(clientfd,&numero_mascotas,sizeof(int),0);
     printf("el numero de registros presentes es: %i \n",numero_mascotas);
-    printf("por favor seleccione el numero de registro ");
+   
     int numregistro;
+    do{
+    printf("por favor seleccione el numero de registro ");
     scanf("%i",&numregistro);
+    }while(numregistro<=0 || numregistro>numero_mascotas);
+    
     r=send(clientfd,&numregistro,sizeof(int),0);
     printf("Desea abrir la historia clinica de la mascota? (S/N)");
     char decision;
@@ -80,9 +84,14 @@ r=send(clientfd,&opcion,sizeof(int),0);
    }else if(opcion==3){
       r=recv(clientfd,&numero_mascotas,sizeof(int),0);
     printf("el numero de registros presentes es: %i \n",numero_mascotas);
-    printf("por favor seleccione el numero de registro que desea eliminar : ");
+    
     int numregistro;
-    scanf("%i",&numregistro);
+    do{
+      printf("por favor seleccione el numero de registro que desea eliminar : ");
+      scanf("%i",&numregistro);
+    }while(numregistro<=0 || numregistro>numero_mascotas);
+    
+    
     r=send(clientfd,&numregistro,sizeof(int),0);
    // EliminarMascota(numregistro-1);
    r=recv(clientfd,mensaje,sizeof(char)*33,0);
