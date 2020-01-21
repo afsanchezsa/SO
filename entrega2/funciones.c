@@ -263,22 +263,22 @@ int indiceTaildelaLista(int indice_front){
 //compara si existe y si los nombres son iguales, colisiona si hay mismo hash pero diferente nombre
 int  Colisiona(char *nombre_nuevo,int posicion){//retorna -1 si no hay colision y 1 si la hay
   if(posicion==-1){
-    printf("entro al especial");
+    //printf("entro al especial");
     return -1;
   }
   struct Nodo *leido=LeerdeBD(posicion);
   char * cadena1=toLower(leido->mascota.nombre);
   char * cadena2=toLower(nombre_nuevo);
-  printf("resultado del comp es %i",strcmp(toLower(leido->mascota.nombre),toLower(nombre_nuevo)));
+  //printf("resultado del comp es %i",strcmp(toLower(leido->mascota.nombre),toLower(nombre_nuevo)));
   int res=strcmp(cadena1,cadena2);
   free(cadena1);
   free(cadena2);
   if(res==0){
       
-    printf("%s no colisiona con %s  (-1)\n",toLower(nombre_nuevo),toLower(leido->mascota.nombre));
+    //printf("%s no colisiona con %s  (-1)\n",toLower(nombre_nuevo),toLower(leido->mascota.nombre));
     return -1;
   }
-   printf("%s colisiona con %s (1)\n",nombre_nuevo,leido->mascota.nombre);
+   //printf("%s colisiona con %s (1)\n",nombre_nuevo,leido->mascota.nombre);
   return 1;
 }
 
@@ -416,16 +416,16 @@ void DesconectarMascota(int posicion){
     free(siguiente);
   }else if(eliminado->anterior!=-1){//ultimo de la lista
     int indice_anterior=eliminado->anterior;
-    printf("tablahash[%i]=%i ahora es ",indiceEnTablaHash(eliminado->mascota.nombre),tablahash[indiceEnTablaHash(eliminado->mascota.nombre)]);
-    printf("tablahash[%i]=%i\n",indiceEnTablaHash(eliminado->mascota.nombre),indice_anterior);
+    //printf("tablahash[%i]=%i ahora es ",indiceEnTablaHash(eliminado->mascota.nombre),tablahash[indiceEnTablaHash(eliminado->mascota.nombre)]);
+    //printf("tablahash[%i]=%i\n",indiceEnTablaHash(eliminado->mascota.nombre),indice_anterior);
     tablahash[indiceEnTablaHash(eliminado->mascota.nombre)]=indice_anterior;
     struct Nodo *anterior=LeerdeBD(indice_anterior);
     anterior->siguiente=-1;
     ActualizarMascotaenBD(indice_anterior,anterior);
     free(anterior);
   }else{//unico de la lista
-    printf("tablahash[%i]=%i ahora es ",indiceEnTablaHash(eliminado->mascota.nombre),tablahash[indiceEnTablaHash(eliminado->mascota.nombre)]);
-    printf("tablahash[%i]=%i\n",indiceEnTablaHash(eliminado->mascota.nombre),-2);
+    //printf("tablahash[%i]=%i ahora es ",indiceEnTablaHash(eliminado->mascota.nombre),tablahash[indiceEnTablaHash(eliminado->mascota.nombre)]);
+    //printf("tablahash[%i]=%i\n",indiceEnTablaHash(eliminado->mascota.nombre),-2);
     
     tablahash[indiceEnTablaHash(eliminado->mascota.nombre)]=-2;//se pone -2 en caso de que ya haya sido usado(problema: manejar el -2 al insertar)
   }
@@ -461,9 +461,9 @@ void EliminarDeLaBD(int posicion){
        actual->siguiente=(actual->siguiente-1);
      }
      if(i>posicion&&actual->siguiente==-1){
-    printf("reindexando:\n");
-    printf("tablahash[%i]=%i ahora es ",indiceEnTablaHash(actual->mascota.nombre),tablahash[indiceEnTablaHash(actual->mascota.nombre)]);
-    printf("tablahash[%i]=%i\n",indiceEnTablaHash(actual->mascota.nombre),i-1);
+    //printf("reindexando:\n");
+    //printf("tablahash[%i]=%i ahora es ",indiceEnTablaHash(actual->mascota.nombre),tablahash[indiceEnTablaHash(actual->mascota.nombre)]);
+    //printf("tablahash[%i]=%i\n",indiceEnTablaHash(actual->mascota.nombre),i-1);
     
        tablahash[indiceEnTablaHash(actual->mascota.nombre)]=i-1; //es el ultimo, actualiza la cabeza de lista
      }
