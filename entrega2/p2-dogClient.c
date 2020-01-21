@@ -117,6 +117,7 @@ r=send(clientfd,&opcion,sizeof(int),0);
       }else if(id==-4){
         break;
       }else{
+        printf("ID: %i",id);
         r=recv(clientfd,recibido,sizeof(struct dogType),0);
         ImprimirEstructura(recibido);
       }

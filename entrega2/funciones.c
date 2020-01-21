@@ -290,8 +290,9 @@ int sondeo(int i){
 
 //Guarda la mascota en el archivo
 void GuardarMascota(struct dogType * mascota,int i){
-
-  int indice=(hash(toLower(mascota->nombre))+sondeo(i))%tam;
+char * name_in_lower=toLower(mascota->nombre);
+  int indice=(hash(name_in_lower)+sondeo(i))%tam;
+  free(name_in_lower);
   int frontLista=tablahash[indice];
   if(frontLista==-1){//no hay  datos
     tablahash[indice]=numero_mascotas;
@@ -349,7 +350,9 @@ char* concat( char *s1,  char *s2){
 
 //opcion 4, busqueda de dogtype por nombre
 void BuscarPorNombre( char *nombre,int i){
-  int index=(hash(toLower(nombre))+sondeo(i))%tam;
+  char *name_in_lower=toLower(nombre);
+  int index=(hash(name_in_lower)+sondeo(i))%tam;
+  free(name_in_lower);
   int nextIndex;
 
   if(tablahash[index]!=-1&&tablahash[index]!=-2&&Colisiona(nombre,tablahash[index])<0){//Hay algo en esa posición
@@ -385,12 +388,20 @@ void BuscarPorNombre( char *nombre,int i){
 int indiceEnTablaHash(char * nombre){
   int indice;
   int j=-1;
-  struct Nodo *leido;
+  struct Nodo *leido;int comp;
   do{
     j++;
-    indice=(hash(toLower(nombre))+sondeo(j))%tam;
+    char * name_in_lower=toLower(nombre);
+    indice=(hash(name_in_lower)+sondeo(j))%tam;
+    
     leido=LeerdeBD(tablahash[indice]);
-  }while(strcmp(toLower(leido->mascota.nombre),toLower(nombre))!=0);
+    char *leido_in_lower=toLower(leido->mascota.nombre);
+    
+    
+     comp=strcmp(leido_in_lower,name_in_lower); 
+  free(name_in_lower);
+  free(leido_in_lower);
+  }while(comp!=0);
   return indice;
 }
 
@@ -407,6 +418,7 @@ void DesconectarMascota(int posicion){
     ActualizarMascotaenBD(eliminado->siguiente,siguiente);
     free(anterior);
     free(siguiente);
+    printf("se desconecta uno de la mitad\n");
   }else if(eliminado->siguiente!=-1){//primero de la lista
     int indice_siguiente=eliminado->siguiente;
     struct Nodo * siguiente=LeerdeBD(indice_siguiente);
@@ -414,6 +426,7 @@ void DesconectarMascota(int posicion){
     //tablahash[indiceEnTablaHash(eliminado->mascota.nombre)]=indice_siguiente; //se actualiza la tablaen el ultimo y e l primero
     ActualizarMascotaenBD(indice_siguiente,siguiente);
     free(siguiente);
+    printf("se desconecta el primero de la lista\n");
   }else if(eliminado->anterior!=-1){//ultimo de la lista
     int indice_anterior=eliminado->anterior;
     //printf("tablahash[%i]=%i ahora es ",indiceEnTablaHash(eliminado->mascota.nombre),tablahash[indiceEnTablaHash(eliminado->mascota.nombre)]);
@@ -423,10 +436,11 @@ void DesconectarMascota(int posicion){
     anterior->siguiente=-1;
     ActualizarMascotaenBD(indice_anterior,anterior);
     free(anterior);
+    printf("se desconecta el ultimo de la lista\n");
   }else{//unico de la lista
     //printf("tablahash[%i]=%i ahora es ",indiceEnTablaHash(eliminado->mascota.nombre),tablahash[indiceEnTablaHash(eliminado->mascota.nombre)]);
     //printf("tablahash[%i]=%i\n",indiceEnTablaHash(eliminado->mascota.nombre),-2);
-    
+    printf("se desconecta el unico de la lista\n");
     tablahash[indiceEnTablaHash(eliminado->mascota.nombre)]=-2;//se pone -2 en caso de que ya haya sido usado(problema: manejar el -2 al insertar)
   }
   
@@ -446,14 +460,16 @@ void EliminarDeLaBD(int posicion){
         perror("No existe el archivo");
         exit(-1);
   }
-  struct Nodo * actual=malloc(sizeof(struct Nodo));
+  struct Nodo * actual=(struct Nodo* )malloc(sizeof(struct Nodo));
   if (actual == NULL){
         perror("error en el malloc");
         exit(-1);
     } 
+  FILE *archiv=bdLectura();
   for(i=0;i<numero_mascotas;i++){
+     
     if(i!=posicion){//lee todos menos lo que esta en esa posición, saltarlo
-     actual=LeerdeBD(i);
+    actual=LeerdeBD(i); 
      if(actual->anterior>posicion){
        actual->anterior=(actual->anterior-1);//corre todas las posiciones
      }
@@ -491,9 +507,10 @@ void IntegerToString(int entero, char * cadena){
 sprintf(cadena, "%d", entero);
 }
 void BuscarPorNombreyEnviaraCliente( char *nombre,int i,int clientfd){
-  int index=(hash(toLower(nombre))+sondeo(i))%tam;
+  char * name_in_lower=toLower(nombre);
+  int index=(hash(name_in_lower)+sondeo(i))%tam;
   int nextIndex;
-
+free(name_in_lower);
   if(tablahash[index]!=-1&&tablahash[index]!=-2&&Colisiona(nombre,tablahash[index])<0){//Hay algo en esa posición
     struct Nodo * buscado=(struct Nodo *)malloc(sizeof(struct Nodo));
     if (buscado == NULL){
