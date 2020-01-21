@@ -284,7 +284,7 @@ int  Colisiona(char *nombre_nuevo,int posicion){//retorna -1 si no hay colision 
 
 //retorna el cuadrado, si hay colisión suma valor al hash
 int sondeo(int i){
-if(i>0)printf("sondea");
+//if(i>0)printf("sondea");
   return (i*i);
 }
 
