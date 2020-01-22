@@ -106,6 +106,7 @@ if(opcion==1){
         exit(-1);
     } 
     r=recv(currentClient->clientfd,nombre,sizeof(char)*33,0);
+   
     BuscarPorNombreyEnviaraCliente(nombre,0,currentClient->clientfd);
      log->opcion=opcion;
       log->cadena_buscada=nombre;

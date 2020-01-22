@@ -418,7 +418,7 @@ void DesconectarMascota(int posicion){
     ActualizarMascotaenBD(eliminado->siguiente,siguiente);
     free(anterior);
     free(siguiente);
-    printf("se desconecta uno de la mitad\n");
+    //printf("se desconecta uno de la mitad\n");
   }else if(eliminado->siguiente!=-1){//primero de la lista
     int indice_siguiente=eliminado->siguiente;
     struct Nodo * siguiente=LeerdeBD(indice_siguiente);
@@ -426,7 +426,7 @@ void DesconectarMascota(int posicion){
     //tablahash[indiceEnTablaHash(eliminado->mascota.nombre)]=indice_siguiente; //se actualiza la tablaen el ultimo y e l primero
     ActualizarMascotaenBD(indice_siguiente,siguiente);
     free(siguiente);
-    printf("se desconecta el primero de la lista\n");
+    //printf("se desconecta el primero de la lista\n");
   }else if(eliminado->anterior!=-1){//ultimo de la lista
     int indice_anterior=eliminado->anterior;
     //printf("tablahash[%i]=%i ahora es ",indiceEnTablaHash(eliminado->mascota.nombre),tablahash[indiceEnTablaHash(eliminado->mascota.nombre)]);
@@ -436,11 +436,11 @@ void DesconectarMascota(int posicion){
     anterior->siguiente=-1;
     ActualizarMascotaenBD(indice_anterior,anterior);
     free(anterior);
-    printf("se desconecta el ultimo de la lista\n");
+   // printf("se desconecta el ultimo de la lista\n");
   }else{//unico de la lista
     //printf("tablahash[%i]=%i ahora es ",indiceEnTablaHash(eliminado->mascota.nombre),tablahash[indiceEnTablaHash(eliminado->mascota.nombre)]);
     //printf("tablahash[%i]=%i\n",indiceEnTablaHash(eliminado->mascota.nombre),-2);
-    printf("se desconecta el unico de la lista\n");
+    //printf("se desconecta el unico de la lista\n");
     tablahash[indiceEnTablaHash(eliminado->mascota.nombre)]=-2;//se pone -2 en caso de que ya haya sido usado(problema: manejar el -2 al insertar)
   }
   
@@ -465,7 +465,7 @@ void EliminarDeLaBD(int posicion){
         perror("error en el malloc");
         exit(-1);
     } 
-  FILE *archiv=bdLectura();
+  
   for(i=0;i<numero_mascotas;i++){
      
     if(i!=posicion){//lee todos menos lo que esta en esa posición, saltarlo
@@ -482,6 +482,10 @@ void EliminarDeLaBD(int posicion){
     //printf("tablahash[%i]=%i\n",indiceEnTablaHash(actual->mascota.nombre),i-1);
     
        tablahash[indiceEnTablaHash(actual->mascota.nombre)]=i-1; //es el ultimo, actualiza la cabeza de lista
+     }
+     if(i>numero_mascotas-5){
+       ImprimirNodo(actual);
+       //printf("numero mascotas es  %i y i es %i \n",numero_mascotas,i);
      }
      fwrite(actual,sizeof(struct Nodo),1,temporal);
      free(actual);
@@ -517,7 +521,7 @@ free(name_in_lower);
         perror("error en el malloc");
         exit(-1);
     } 
-    bd=bdLectura();
+    bd=bdLectura(); //al parecer es innecesario
     buscado=LeerdeBD(tablahash[index]);
     //printf("/////////////////\n");
     int indic=tablahash[index]+1;

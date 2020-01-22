@@ -104,8 +104,11 @@ r=send(clientfd,&opcion,sizeof(int),0);
     if (nombre == NULL){
         perror("erroren el malloc");
         exit(-1);
-    } 
+    }
+     
+    
     scanf("%s",nombre);
+    
       r=send(clientfd,nombre,sizeof(char)*33,0);
     //BuscarPorNombre(nombre,0);
     int id;
