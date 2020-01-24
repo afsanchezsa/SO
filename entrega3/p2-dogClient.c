@@ -113,6 +113,10 @@ r=send(clientfd,&opcion,sizeof(int),0);
     struct dogType * recibido=(struct dogType *)malloc(sizeof(struct dogType));
     printf("inserte el nombre por favor");
     char *nombre=(char *)malloc(sizeof(char)*33);
+    int jp;
+    for(jp=0;jp<33;jp++){
+      nombre[jp]='\0';
+    }
     //toLower(nombre);
     if (nombre == NULL){
         perror("erroren el malloc");

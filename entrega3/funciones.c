@@ -113,7 +113,7 @@ char * toLower(char *arr){
     int i;
    // char * minuscula=(char *)malloc(sizeof(char)*33); 
 for(i=0;i<33;i++){
-  minuscula[i]=0;
+  minuscula[i]='\0';
 }    
     for( i = 0; arr[i]; i++){
   minuscula[i] = tolower(arr[i]);
