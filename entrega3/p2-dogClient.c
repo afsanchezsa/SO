@@ -107,6 +107,12 @@ r=send(clientfd,&opcion,sizeof(int),0);
     
     r=send(clientfd,&numregistro,sizeof(int),0);
    // EliminarMascota(numregistro-1);
+   int respuesta;
+   r=recv(clientfd,&respuesta,sizeof(int),0);
+      if(respuesta==-1){
+        printf("Lo sentimos el numero elegido ya no se encuentra disponible \n");
+        continue;
+      }
    r=recv(clientfd,mensaje,sizeof(char)*33,0);
       printf("%s",mensaje);
   }else if(opcion ==4){
@@ -114,9 +120,9 @@ r=send(clientfd,&opcion,sizeof(int),0);
     printf("inserte el nombre por favor");
     char *nombre=(char *)malloc(sizeof(char)*33);
     int jp;
-    for(jp=0;jp<33;jp++){
+    /*for(jp=0;jp<33;jp++){
       nombre[jp]='\0';
-    }
+    }*/
     //toLower(nombre);
     if (nombre == NULL){
         perror("erroren el malloc");

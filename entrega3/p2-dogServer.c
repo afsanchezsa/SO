@@ -12,7 +12,7 @@ struct cliente{
   char * ip;
 };
 int HILODISPONIBLE[NUMHILOS];
-
+int HISTORIA_ABIERTA[NUMHILOS];///-1 si no tiene abierto ningun archivo o el numero del id del archivo abierto
 int numclientesactual;
 void * funcion(void *ap){
   
@@ -83,12 +83,29 @@ r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
         r=send(currentClient->clientfd,&uno,sizeof(int),0);
       }
       por_abrir=LeerdeBD(numregistro-1);
+      
       Desbloquear();
       //////---->desbloquear
+      
+      
       char* seq=concat(por_abrir->mascota.nombre,por_abrir->mascota.raza);
       char *s1=concat("gedit ",seq);
 	  char * archivo=concat(seq,".txt");
     //-------->bloquear historia
+int p;
+bool disponible;
+    do{
+///////------->bloquing para lectura unicamente con sleep() para que otros hilos puedan leer si esta abierta otra historia (no la del mismo registro)
+disponible=true;
+BloquearHistorias();
+for(p=0;p<NUMHILOS;p++){
+disponible=disponible&&HISTORIA_ABIERTA[p]!=numregistro;
+}
+DesbloquearHistorias();
+//////------>desbloquing 
+    }while(!disponible);
+HISTORIA_ABIERTA[currentClient->numhilo]=numregistro;
+      
 	  FILE * clinichistory=fopen(archivo,"r");
 	  if(clinichistory==NULL){
 	  clinichistory=fopen(archivo,"w");
@@ -104,10 +121,8 @@ r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
 	  );
 	  
 	  }
-    if(por_abrir!=NULL){
-    free(por_abrir);
-    }
-    
+if(por_abrir!=NULL){free(por_abrir);}
+
 	  fclose(clinichistory);
     
     r=send(currentClient->clientfd,archivo,sizeof(char)*33,0);//envia nombre del archivo
@@ -116,7 +131,7 @@ r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
 	 // free(clinichistory); descomentar haber si funciona
      RecibirArchivo(currentClient->clientfd,archivo);
     ///------->>> desbloquear historia
-     
+     HISTORIA_ABIERTA[currentClient->numhilo]=-1;
      // char *path=concat(s1,".txt");
       //system(path);
       log->opcion=opcion;
@@ -139,8 +154,19 @@ r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
     //////-------->desbloquear
     int numregistro;
     r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
+    int menosuno=-1;
+    int uno=1;
     ////------------>bloquear
+
     Bloquear();
+      if(numregistro<=0 || numregistro>numero_mascotas){
+        
+        r=send(currentClient->clientfd,&menosuno,sizeof(int),0);
+        Desbloquear();
+        continue;
+      }else{
+        r=send(currentClient->clientfd,&uno,sizeof(int),0);
+      
     EliminarMascota(numregistro-1);
     Desbloquear();
     ////------>desbloquear
@@ -153,13 +179,16 @@ r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
       DesbloquearLog();
       //----->desbloquear log
     r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
+  
+      }
+    
   }else if(opcion ==4){
    // printf("inserte el nombre por favor");
     char *nombre=(char *)malloc(sizeof(char)*33);
     int jp;
-    for(jp=0;jp<33;jp++){
+    /*for(jp=0;jp<33;jp++){
       nombre[jp]='\0';
-    }
+    }*/
     //toLower(nombre);
     if (nombre == NULL){
         perror("erroren el malloc");
@@ -217,6 +246,7 @@ int main(){
   int opcion;
   double peso;
   bool salir=false;
+ 
  InitSync();     
   cargarTablaHash(tablahash);
   FILE * archivo_num_mascotas=fopen("tambd.dat","r");
@@ -234,6 +264,7 @@ int main(){
   int i=0;
   for(i=0;i<NUMHILOS;i++){
     HILODISPONIBLE[i]=1;//si esta en 1 esta disponible
+    HISTORIA_ABIERTA[i]=-1;
   }
   mensaje_accion_realizada=(char *)malloc(sizeof(char)*33);
   mensaje_accion_realizada="accion realizada\n";

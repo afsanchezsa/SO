@@ -25,26 +25,31 @@
 char minuscula[33];
 int terminal_tuberia[2];
 int terminal_tuberia_log[2];
+int terminal_tuberia_historia[2];
 pthread_mutex_t *mutex;
 pthread_mutex_t *mutex_log;
+pthread_mutex_t *mutex_historia;
 char *testigo;
 sem_t *semaforo;
 sem_t *semaforo_log;
-
+sem_t * semaforo_historia;
 void InitSync(){
   if(POSIX==1){
 semaforo=sem_open("tabla",O_CREAT,0700,MAX_PROCESOS);
-
 semaforo_log=sem_open("log",O_CREAT,0700,MAX_PROCESOS);
+ semaforo_historia=sem_open("historia",O_CREAT,0700,MAX_PROCESOS); 
   }else if(POSIX==2){
     pthread_mutex_init(mutex,NULL);
     pthread_mutex_init(mutex_log,NULL);
+    pthread_mutex_init(mutex_historia,NULL);
   }else if(POSIX==3){
     pipe(terminal_tuberia);
     pipe(terminal_tuberia_log);
+    pipe(terminal_tuberia_historia);
     *testigo='t';
     write(terminal_tuberia[1],testigo,sizeof(char));
     write(terminal_tuberia_log[1],testigo,sizeof(char));
+    write(terminal_tuberia_historia[1],testigo,sizeof(char));
   }
 }
 void BloquearSemaforo(){
@@ -106,14 +111,31 @@ pthread_mutex_unlock(mutex_log);
 write(terminal_tuberia_log[1],testigo,sizeof(char));
 }
 }
-
+void BloquearHistorias(){
+if(POSIX==1){
+  sem_wait(semaforo_historia);
+}else if(POSIX==2){
+pthread_mutex_lock(mutex_historia);
+}else if(POSIX==3){
+read(terminal_tuberia_historia[0],testigo,sizeof(char));
+}
+}
+void DesbloquearHistorias(){
+ if(POSIX==1){
+  sem_post(semaforo_historia);
+}else if(POSIX==2){
+pthread_mutex_unlock(mutex_historia);
+}else if(POSIX==3){
+write(terminal_tuberia_historia[1],testigo,sizeof(char));
+} 
+}
 
 
 char * toLower(char *arr){
     int i;
    // char * minuscula=(char *)malloc(sizeof(char)*33); 
 for(i=0;i<33;i++){
-  minuscula[i]='\0';
+  minuscula[i]=0;
 }    
     for( i = 0; arr[i]; i++){
   minuscula[i] = tolower(arr[i]);
