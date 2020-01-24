@@ -12,12 +12,101 @@
 #include <arpa/inet.h>
 #include <netinet/in.h>
 #include <pthread.h>
+#include <fcntl.h>           /* For O_* constants */
+#include <sys/stat.h>        /* For mode constants */
+#include <semaphore.h>
 //#include <curses.h>
+#define MAX_PROCESOS 1
 #define PORT 3535
 #define BACKLOG 32
 #define NUMHILOS 32
 #define tam 100151
+#define POSIX 1 //1 semaforo 2 mutex 3 tuberias 4 mutex condicional 
 char minuscula[33];
+int terminal_tuberia[2];
+int terminal_tuberia_log[2];
+pthread_mutex_t *mutex;
+pthread_mutex_t *mutex_log;
+char *testigo;
+sem_t *semaforo;
+sem_t *semaforo_log;
+
+void InitSync(){
+  if(POSIX==1){
+semaforo=sem_open("tabla",O_CREAT,0700,MAX_PROCESOS);
+
+semaforo_log=sem_open("log",O_CREAT,0700,MAX_PROCESOS);
+  }else if(POSIX==2){
+    pthread_mutex_init(mutex,NULL);
+    pthread_mutex_init(mutex_log,NULL);
+  }else if(POSIX==3){
+    pipe(terminal_tuberia);
+    pipe(terminal_tuberia_log);
+    *testigo='t';
+    write(terminal_tuberia[1],testigo,sizeof(char));
+    write(terminal_tuberia_log[1],testigo,sizeof(char));
+  }
+}
+void BloquearSemaforo(){
+sem_wait(semaforo);
+}
+void LiberarSemaforo(){
+sem_post(semaforo);
+}
+void BloquearMutex(){
+  pthread_mutex_lock(mutex);
+}
+void DesbloquearMutex(){
+  pthread_mutex_unlock(mutex);
+}
+void BloquearTuberia(){
+  read(terminal_tuberia[0],testigo,sizeof(char));
+}
+void DesbloquearTuberia(){
+  write(terminal_tuberia[1],testigo,sizeof(char));
+}
+void Bloquear(){
+if(POSIX==1){
+  BloquearSemaforo();
+}else if(POSIX==2){
+BloquearMutex();
+}else if(POSIX==3){
+BloquearTuberia();
+}else if(POSIX==4){
+
+}
+}
+void Desbloquear(){
+ if(POSIX==1){
+   LiberarSemaforo();
+}else if(POSIX==2){
+DesbloquearMutex();
+}else if(POSIX==3){
+DesbloquearTuberia();
+}else if(POSIX==4){
+
+} 
+}
+void BloquearLog(){
+if(POSIX==1){
+  sem_wait(semaforo_log);
+}else if(POSIX==2){
+pthread_mutex_lock(mutex_log);
+}else if(POSIX==3){
+read(terminal_tuberia_log[0],testigo,sizeof(char));
+}
+}
+
+void DesbloquearLog(){
+if(POSIX==1){
+  sem_post(semaforo_log);
+}else if(POSIX==2){
+pthread_mutex_unlock(mutex_log);
+}else if(POSIX==3){
+write(terminal_tuberia_log[1],testigo,sizeof(char));
+}
+}
+
 
 
 char * toLower(char *arr){

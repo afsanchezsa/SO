@@ -59,23 +59,36 @@ r=send(clientfd,&opcion,sizeof(int),0);
     printf("el numero de registros presentes es: %i \n",numero_mascotas);
    
     int numregistro;
+    
+    int respuesta;
     do{
+      do{
     printf("por favor seleccione el numero de registro ");
     scanf("%i",&numregistro);
     }while(numregistro<=0 || numregistro>numero_mascotas);
     
-    r=send(clientfd,&numregistro,sizeof(int),0);
+      r=send(clientfd,&numregistro,sizeof(int),0);
+    
+      r=recv(clientfd,&respuesta,sizeof(int),0);
+    }while(respuesta==-1);
     printf("Desea abrir la historia clinica de la mascota? (S/N)");
     char decision;
     scanf(" %c",&decision);
     r=send(clientfd,&decision,sizeof(char),0);
     
     if(decision=='S'|| decision=='s'){
+      r=recv(clientfd,&respuesta,sizeof(int),0);
+      if(respuesta==-1){
+        printf("Lo sentimos el numero elegido ya no se encuentra disponible \n");
+        continue;
+      }
       r=recv(clientfd,filename,sizeof(char)*33,0);
-      RecibirArchivo(clientfd,filename);
-      system(concat("gedit ",filename));
-    EnviarArchivo(clientfd,filename);
-   
+      char *newFile=concat("second",filename);
+      RecibirArchivo(clientfd,newFile);
+      system(concat("gedit ",newFile));
+      EnviarArchivo(clientfd,newFile);
+      system(concat("rm ",newFile));
+      free(newFile);
     }
     
       r=recv(clientfd,mensaje,sizeof(char)*33,0);

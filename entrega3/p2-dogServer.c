@@ -29,73 +29,129 @@ if(opcion==1){
       struct dogType *insertado=(struct dogType *)malloc(sizeof(struct dogType));
       
       r=recv(currentClient->clientfd,insertado,sizeof(struct dogType),0);
+     // ------------------------------> bloquear
+     Bloquear();
       GuardarMascota(insertado,0);
+      Desbloquear();
+      //-------->desbloquear
     free(insertado);
     //warning("esto es una alerta");
     
     log->opcion=opcion;
+    Bloquear();
     log->registro=numero_mascotas;
+    Desbloquear();
     log->ip=currentClient->ip;
+    ////------->bloquear log
+    BloquearLog();
     writelog(log);
+    DesbloquearLog();
+    /////------->desbloquear log
     r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
   }else if(opcion==2){
    // printf("el numero de registros presentes es: %i \n",numero_mascotas);
+    ///----->bloquear
+    Bloquear();
     r=send(currentClient->clientfd,&numero_mascotas,sizeof(int),0);
+    Desbloquear();
+    /////------>debloquear
+    int numregistro=-1;
     
-    int numregistro;
-    r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
-    //printf("Desea abrir la historia clinica de la mascota? (S/N)");
+    while(numregistro==-1){
+r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
+    Bloquear();
+    numregistro=numregistro>0&&numregistro<=numero_mascotas?numregistro:-1;
+    Desbloquear();
+    r=send(currentClient->clientfd,&numregistro,sizeof(int),0);
+    }
+    
+    struct Nodo * por_abrir;
+    
     char decision;
     r=recv(currentClient->clientfd,&decision,sizeof(char),0);
     if(decision=='S'|| decision=='s'){
-      por_revisar=LeerdeBD(numregistro-1);
-      char* seq=concat(por_revisar->mascota.nombre,por_revisar->mascota.raza);
+      ////------->bloquear
+      int menosuno=-1;
+      int uno=1;
+      Bloquear();
+      if(numregistro<=0 || numregistro>numero_mascotas){
+        
+        r=send(currentClient->clientfd,&menosuno,sizeof(int),0);
+        Desbloquear();
+        continue;
+      }else{
+        r=send(currentClient->clientfd,&uno,sizeof(int),0);
+      }
+      por_abrir=LeerdeBD(numregistro-1);
+      Desbloquear();
+      //////---->desbloquear
+      char* seq=concat(por_abrir->mascota.nombre,por_abrir->mascota.raza);
       char *s1=concat("gedit ",seq);
 	  char * archivo=concat(seq,".txt");
+    //-------->bloquear historia
 	  FILE * clinichistory=fopen(archivo,"r");
 	  if(clinichistory==NULL){
 	  clinichistory=fopen(archivo,"w");
 	  fprintf(clinichistory,"NOMBRE:%s\nTIPO:%s\nEDAD:%i\nRAZA:%s\nESTATURA:%i\nPESO:%lf\nSEXO:%c\n",
-	  por_revisar->mascota.nombre,
-	  por_revisar->mascota.tipo,
-	  por_revisar->mascota.edad,
-	  por_revisar->mascota.raza,
-	  por_revisar->mascota.estatura,
-	  por_revisar->mascota.peso,
-	  por_revisar->mascota.sexo
+	  por_abrir->mascota.nombre,
+	  por_abrir->mascota.tipo,
+	  por_abrir->mascota.edad,
+	  por_abrir->mascota.raza,
+	  por_abrir->mascota.estatura,
+	  por_abrir->mascota.peso,
+	  por_abrir->mascota.sexo
 	  
 	  );
 	  
 	  }
+    if(por_abrir!=NULL){
+    free(por_abrir);
+    }
+    
 	  fclose(clinichistory);
+    
     r=send(currentClient->clientfd,archivo,sizeof(char)*33,0);//envia nombre del archivo
+    
     EnviarArchivo(currentClient->clientfd,archivo);
 	 // free(clinichistory); descomentar haber si funciona
      RecibirArchivo(currentClient->clientfd,archivo);
-     
+    ///------->>> desbloquear historia
      
      // char *path=concat(s1,".txt");
       //system(path);
       log->opcion=opcion;
       log->registro=numregistro;
       log->ip=currentClient->ip;
+      ////----->bloquear log
+      BloquearLog();
       writelog(log);
-
+      DesbloquearLog();
+      ///---->desbloquear log
   }
   r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
   
   }else if(opcion==3){
     //printf("el numero de registros presentes es: %i \n",numero_mascotas);
+    //////----->bloquear
+    Bloquear();
     r=send(currentClient->clientfd,&numero_mascotas,sizeof(int),0);
-    //printf("por favor seleccione el numero de registro que desea eliminar : ");
+    Desbloquear();
+    //////-------->desbloquear
     int numregistro;
     r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
+    ////------------>bloquear
+    Bloquear();
     EliminarMascota(numregistro-1);
+    Desbloquear();
+    ////------>desbloquear
     log->opcion=opcion;
       log->registro=numregistro;
       log->ip=currentClient->ip;
+      //---->bloquearLog
+      BloquearLog();
       writelog(log);
-
+      DesbloquearLog();
+      //----->desbloquear log
     r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
   }else if(opcion ==4){
    // printf("inserte el nombre por favor");
@@ -106,24 +162,34 @@ if(opcion==1){
         exit(-1);
     } 
     r=recv(currentClient->clientfd,nombre,sizeof(char)*33,0);
+    //----->bloquear
+    Bloquear();
     BuscarPorNombreyEnviaraCliente(nombre,0,currentClient->clientfd);
+    Desbloquear();
+    ////-------->desbloquear
      log->opcion=opcion;
       log->cadena_buscada=nombre;
       log->ip=currentClient->ip;
+      /////---->bloquear log
+      BloquearLog();
       writelog(log);
-
+      DesbloquearLog();
+      /////------>desbloquear log
      r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
   }else {
      r=send(currentClient->clientfd,mensaje_despedida,sizeof(char)*33,0);
+      ////----->bloquear
+      Bloquear();
       CambiarTamanioBd(numero_mascotas);
     GuardarTablaHash();
-    
+    Desbloquear();
+    /////---->>desbloquear
     break;
   }
 
 
 }while(1>0);
-
+//////////////////////!!!!!!!!!!!!!!!!!!! posible seccion critica
 close(currentClient->clientfd);
 HILODISPONIBLE[currentClient->numhilo]=1;
 numclientesactual--;
@@ -147,7 +213,7 @@ int main(){
   int opcion;
   double peso;
   bool salir=false;
-      
+ InitSync();     
   cargarTablaHash(tablahash);
   FILE * archivo_num_mascotas=fopen("tambd.dat","r");
   if (archivo_num_mascotas == NULL){
