@@ -156,6 +156,10 @@ r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
   }else if(opcion ==4){
    // printf("inserte el nombre por favor");
     char *nombre=(char *)malloc(sizeof(char)*33);
+    int jp;
+    for(jp=0;jp<33;jp++){
+      nombre[jp]='\0';
+    }
     //toLower(nombre);
     if (nombre == NULL){
         perror("erroren el malloc");
