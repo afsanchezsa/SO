@@ -184,11 +184,12 @@ if(por_abrir!=NULL){free(por_abrir);}
     
   }else if(opcion ==4){
    // printf("inserte el nombre por favor");
-    char *nombre=(char *)malloc(sizeof(char)*33);
+    /*char *nombre=(char *)malloc(sizeof(char)*33);
     int jp;
-    /*for(jp=0;jp<33;jp++){
-      nombre[jp]='\0';
+    for(jp=0;jp<33;jp++){
+      nombre[jp]=0;
     }*/
+    char nombre[33];
     //toLower(nombre);
     if (nombre == NULL){
         perror("erroren el malloc");
@@ -216,6 +217,7 @@ if(por_abrir!=NULL){free(por_abrir);}
       CambiarTamanioBd(numero_mascotas);
     GuardarTablaHash();
     Desbloquear();
+    
     /////---->>desbloquear
     break;
   }
@@ -226,6 +228,11 @@ if(por_abrir!=NULL){free(por_abrir);}
 close(currentClient->clientfd);
 HILODISPONIBLE[currentClient->numhilo]=1;
 numclientesactual--;
+if(numclientesactual==0){
+DestroySync();
+printf("FINALIZADO");
+exit(0);
+}
 
 }
 

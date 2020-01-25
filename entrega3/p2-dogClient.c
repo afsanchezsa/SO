@@ -118,11 +118,12 @@ r=send(clientfd,&opcion,sizeof(int),0);
   }else if(opcion ==4){
     struct dogType * recibido=(struct dogType *)malloc(sizeof(struct dogType));
     printf("inserte el nombre por favor");
-    char *nombre=(char *)malloc(sizeof(char)*33);
+    /*char *nombre=(char *)malloc(sizeof(char)*33);
     int jp;
-    /*for(jp=0;jp<33;jp++){
+    for(jp=0;jp<33;jp++){
       nombre[jp]='\0';
     }*/
+    char nombre[33];
     //toLower(nombre);
     if (nombre == NULL){
         perror("erroren el malloc");
@@ -139,9 +140,18 @@ r=send(clientfd,&opcion,sizeof(int),0);
       break;
       }else if(id==-4){
         break;
-      }else{
+      }else {
+        
         r=recv(clientfd,recibido,sizeof(struct dogType),0);
+        
+        
+        char * first=MyLower(nombre);
+        char * second=MyLower(recibido->nombre);
+        printf("la comparacion esta dando:%i \n y el id es :%i\n el num mas es %i",strcmp(first,second),id,numero_mascotas);
+        if(id<=0 ||strcmp(first,second)!=0){continue;}
         ImprimirEstructura(recibido);
+        free(first);
+        free(second);
       }
 
     }while(1>0);
