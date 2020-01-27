@@ -24,7 +24,7 @@ if(r==-1){
     perror("error en el connect");
     exit(-1);
 }
-r=recv(clientfd,mensaje,sizeof(char)*33,0);
+r=recvAll(clientfd,mensaje,sizeof(char)*33);
 if(r==-1){
     perror("error en el recv");
     exit(-1);
@@ -44,18 +44,18 @@ do{
 
   printf("inserte una opcion por favor: ");
     scanf("%i",&opcion);
-r=send(clientfd,&opcion,sizeof(int),0);
+r=sendAll(clientfd,&opcion,sizeof(int));
   if(opcion==1){
       struct dogType *insertado=LeerEstructura();
       //toLower(insertado->nombre);
       //GuardarMascota(insertado,0);
-      r=send(clientfd,insertado,sizeof(struct dogType),0);
+      r=sendAll(clientfd,insertado,sizeof(struct dogType));
       free(insertado);
-      r=recv(clientfd,mensaje,sizeof(char)*33,0);
+      r=recvAll(clientfd,mensaje,sizeof(char)*33);
       printf("%s",mensaje);
     
   }else if(opcion==2){
-    r=recv(clientfd,&numero_mascotas,sizeof(int),0);
+    r=recvAll(clientfd,&numero_mascotas,sizeof(int));
     printf("el numero de registros presentes es: %i \n",numero_mascotas);
    
     int numregistro;
@@ -67,22 +67,22 @@ r=send(clientfd,&opcion,sizeof(int),0);
     scanf("%i",&numregistro);
     }while(numregistro<=0 || numregistro>numero_mascotas);
     
-      r=send(clientfd,&numregistro,sizeof(int),0);
+      r=sendAll(clientfd,&numregistro,sizeof(int));
     
-      r=recv(clientfd,&respuesta,sizeof(int),0);
+      r=recvAll(clientfd,&respuesta,sizeof(int));
     }while(respuesta==-1);
     printf("Desea abrir la historia clinica de la mascota? (S/N)");
     char decision;
     scanf(" %c",&decision);
-    r=send(clientfd,&decision,sizeof(char),0);
+    r=sendAll(clientfd,&decision,sizeof(char));
     
     if(decision=='S'|| decision=='s'){
-      r=recv(clientfd,&respuesta,sizeof(int),0);
+      r=recvAll(clientfd,&respuesta,sizeof(int));
       if(respuesta==-1){
         printf("Lo sentimos el numero elegido ya no se encuentra disponible \n");
         continue;
       }
-      r=recv(clientfd,filename,sizeof(char)*33,0);
+      r=recvAll(clientfd,filename,sizeof(char)*33);
       char *newFile=concat("second",filename);
       RecibirArchivo(clientfd,newFile);
       system(concat("gedit ",newFile));
@@ -91,11 +91,11 @@ r=send(clientfd,&opcion,sizeof(int),0);
       free(newFile);
     }
     
-      r=recv(clientfd,mensaje,sizeof(char)*33,0);
+      r=recvAll(clientfd,mensaje,sizeof(char)*33);
       printf("%s",mensaje);
    
    }else if(opcion==3){
-      r=recv(clientfd,&numero_mascotas,sizeof(int),0);
+      r=recvAll(clientfd,&numero_mascotas,sizeof(int));
     printf("el numero de registros presentes es: %i \n",numero_mascotas);
     
     int numregistro;
@@ -105,15 +105,15 @@ r=send(clientfd,&opcion,sizeof(int),0);
     }while(numregistro<=0 || numregistro>numero_mascotas);
     
     
-    r=send(clientfd,&numregistro,sizeof(int),0);
+    r=sendAll(clientfd,&numregistro,sizeof(int));
    // EliminarMascota(numregistro-1);
    int respuesta;
-   r=recv(clientfd,&respuesta,sizeof(int),0);
+   r=recvAll(clientfd,&respuesta,sizeof(int));
       if(respuesta==-1){
         printf("Lo sentimos el numero elegido ya no se encuentra disponible \n");
         continue;
       }
-   r=recv(clientfd,mensaje,sizeof(char)*33,0);
+   r=recvAll(clientfd,mensaje,sizeof(char)*33);
       printf("%s",mensaje);
   }else if(opcion ==4){
     struct dogType * recibido=(struct dogType *)malloc(sizeof(struct dogType));
@@ -130,11 +130,11 @@ r=send(clientfd,&opcion,sizeof(int),0);
         exit(-1);
     } 
     scanf("%s",nombre);
-      r=send(clientfd,nombre,sizeof(char)*33,0);
+      r=sendAll(clientfd,nombre,sizeof(char)*33);
     //BuscarPorNombre(nombre,0);
     int id;
     do{
-      r=recv(clientfd,&id,sizeof(int),0);
+      r=recvAll(clientfd,&id,sizeof(int));
       if(id==-5){
         printf("lo sentimos no se han encontrado resultados");  
       break;
@@ -142,7 +142,7 @@ r=send(clientfd,&opcion,sizeof(int),0);
         break;
       }else {
         
-        r=recv(clientfd,recibido,sizeof(struct dogType),0);
+        r=recvAll(clientfd,recibido,sizeof(struct dogType));
         
         
         char * first=MyLower(nombre);
@@ -155,10 +155,10 @@ r=send(clientfd,&opcion,sizeof(int),0);
       }
 
     }while(1>0);
-       r=recv(clientfd,mensaje,sizeof(char)*33,0);
+       r=recvAll(clientfd,mensaje,sizeof(char)*33);
        printf("%s",mensaje);
   }else {
-    r=recv(clientfd,mensaje,sizeof(char)*33,0);
+    r=recvAll(clientfd,mensaje,sizeof(char)*33);
        printf("%s",mensaje);
     break;
   }

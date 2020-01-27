@@ -33,6 +33,31 @@ char *testigo;
 sem_t *semaforo;
 sem_t *semaforo_log;
 sem_t * semaforo_historia;
+int recvAll(int cliente,void * puntero, int size){
+  int recibido=0;
+  int res;
+  while(recibido<size){
+    res=recv(cliente,puntero+recibido,size-recibido,0);
+  if(res==-1){
+    perror("error al recibir");
+    exit(-1);
+  }
+  recibido+=res;
+  }
+  return recibido;
+}
+int sendAll(int descriptor,void * puntero, int size){
+  int enviado=0;
+  int res;
+  while(enviado< size){
+    res=send(descriptor,puntero+enviado,size-enviado,0);
+    if(res==-1){perror("error al enviar");}
+    enviado+=res;
+
+  }
+return enviado;
+}
+
 char * MyLower(char *arr){
   char *minus=(char *)malloc(sizeof(char)*33);
     int i;
@@ -628,12 +653,12 @@ void BuscarPorNombreyEnviaraCliente( char *nombre,int i,int clientfd){
     buscado=LeerdeBD(tablahash[index]);
     //printf("/////////////////\n");
     int indic=tablahash[index]+1;
-     r=send(clientfd,&indic,sizeof(int),0);
+     r=sendAll(clientfd,&indic,sizeof(int));
        printf("indice %i:\n",indic);
 //    printf("ID: %i \n",tablahash[index]+1);
 printf("cabeza:\n");
 ImprimirEstructura(&buscado->mascota);
-r=send(clientfd,&buscado->mascota,sizeof(struct dogType),0);
+r=sendAll(clientfd,&buscado->mascota,sizeof(struct dogType));
     //ImprimirEstructura(&buscado->mascota);
     nextIndex=buscado->anterior;
   
@@ -641,7 +666,7 @@ r=send(clientfd,&buscado->mascota,sizeof(struct dogType),0);
       buscado=LeerdeBD(nextIndex);
       //printf("/////////////////\n");
       indic=nextIndex+1;
-       r=send(clientfd,&indic,sizeof(int),0);
+       r=sendAll(clientfd,&indic,sizeof(int));
       
       //printf("ID: %i\n",nextIndex+1);
       r=send(clientfd,&buscado->mascota,sizeof(struct dogType),0);
@@ -656,12 +681,12 @@ r=send(clientfd,&buscado->mascota,sizeof(struct dogType),0);
       free(second);
     }
     int codigoTerminado=-5;
-     r=send(clientfd,&codigoTerminado,sizeof(int),0);
+     r=sendAll(clientfd,&codigoTerminado,sizeof(int));
   }else if(tablahash[index]==-2||Colisiona(nombre,tablahash[index])>0){//bsca con un sondeo diferente
     return BuscarPorNombreyEnviaraCliente(nombre,i+1,clientfd);
   }else{
     int codigoNohayElementos=-4;
-     r=send(clientfd,&codigoNohayElementos,sizeof(int),0);
+     r=sendAll(clientfd,&codigoNohayElementos,sizeof(int));
     //printf("lo sentimos no se han encontrado resultados");  
   }
   
@@ -716,12 +741,12 @@ void RecibirArchivo(int descriptor,char * filename){
      
   
    
-    r=recv(descriptor,&c,sizeof(char),0);
+    r=recvAll(descriptor,&c,sizeof(char));
     
     while (c != EOF) 
     { 
         fputc(c, fptr2); 
-         r=recv(descriptor,&c,sizeof(char),0);
+         r=recvAll(descriptor,&c,sizeof(char));
     } 
   
     

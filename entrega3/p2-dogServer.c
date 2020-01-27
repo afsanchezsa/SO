@@ -20,15 +20,15 @@ struct cliente * currentClient =(struct cliente *)ap;
 
 int opcion;
 int r;
-r=send(currentClient->clientfd,mensaje_confirmacion,sizeof(char)*33,0);
+r=sendAll(currentClient->clientfd,mensaje_confirmacion,sizeof(char)*33);
 
 do{
-r=recv(currentClient->clientfd,&opcion,sizeof(int),0);
+r=recvAll(currentClient->clientfd,&opcion,sizeof(int));
 struct Log * log=(struct Log *)malloc(sizeof(struct Log));
 if(opcion==1){
       struct dogType *insertado=(struct dogType *)malloc(sizeof(struct dogType));
       
-      r=recv(currentClient->clientfd,insertado,sizeof(struct dogType),0);
+      r=recvAll(currentClient->clientfd,insertado,sizeof(struct dogType));
      // ------------------------------> bloquear
      Bloquear();
       GuardarMascota(insertado,0);
@@ -47,28 +47,28 @@ if(opcion==1){
     writelog(log);
     DesbloquearLog();
     /////------->desbloquear log
-    r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
+    r=sendAll(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33);
   }else if(opcion==2){
    // printf("el numero de registros presentes es: %i \n",numero_mascotas);
     ///----->bloquear
     Bloquear();
-    r=send(currentClient->clientfd,&numero_mascotas,sizeof(int),0);
+    r=sendAll(currentClient->clientfd,&numero_mascotas,sizeof(int));
     Desbloquear();
     /////------>debloquear
     int numregistro=-1;
     
     while(numregistro==-1){
-r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
+r=recvAll(currentClient->clientfd,&numregistro,sizeof(int));
     Bloquear();
     numregistro=numregistro>0&&numregistro<=numero_mascotas?numregistro:-1;
     Desbloquear();
-    r=send(currentClient->clientfd,&numregistro,sizeof(int),0);
+    r=sendAll(currentClient->clientfd,&numregistro,sizeof(int));
     }
     
     struct Nodo * por_abrir;
     
     char decision;
-    r=recv(currentClient->clientfd,&decision,sizeof(char),0);
+    r=recvAll(currentClient->clientfd,&decision,sizeof(char));
     if(decision=='S'|| decision=='s'){
       ////------->bloquear
       int menosuno=-1;
@@ -76,11 +76,11 @@ r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
       Bloquear();
       if(numregistro<=0 || numregistro>numero_mascotas){
         
-        r=send(currentClient->clientfd,&menosuno,sizeof(int),0);
+        r=sendAll(currentClient->clientfd,&menosuno,sizeof(int));
         Desbloquear();
         continue;
       }else{
-        r=send(currentClient->clientfd,&uno,sizeof(int),0);
+        r=sendAll(currentClient->clientfd,&uno,sizeof(int));
       }
       por_abrir=LeerdeBD(numregistro-1);
       
@@ -125,7 +125,7 @@ if(por_abrir!=NULL){free(por_abrir);}
 
 	  fclose(clinichistory);
     
-    r=send(currentClient->clientfd,archivo,sizeof(char)*33,0);//envia nombre del archivo
+    r=sendAll(currentClient->clientfd,archivo,sizeof(char)*33);//envia nombre del archivo
     
     EnviarArchivo(currentClient->clientfd,archivo);
 	 // free(clinichistory); descomentar haber si funciona
@@ -143,17 +143,17 @@ if(por_abrir!=NULL){free(por_abrir);}
       DesbloquearLog();
       ///---->desbloquear log
   }
-  r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
+  r=sendAll(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33);
   
   }else if(opcion==3){
     //printf("el numero de registros presentes es: %i \n",numero_mascotas);
     //////----->bloquear
     Bloquear();
-    r=send(currentClient->clientfd,&numero_mascotas,sizeof(int),0);
+    r=sendAll(currentClient->clientfd,&numero_mascotas,sizeof(int));
     Desbloquear();
     //////-------->desbloquear
     int numregistro;
-    r=recv(currentClient->clientfd,&numregistro,sizeof(int),0);
+    r=recvAll(currentClient->clientfd,&numregistro,sizeof(int));
     int menosuno=-1;
     int uno=1;
     ////------------>bloquear
@@ -161,11 +161,11 @@ if(por_abrir!=NULL){free(por_abrir);}
     Bloquear();
       if(numregistro<=0 || numregistro>numero_mascotas){
         
-        r=send(currentClient->clientfd,&menosuno,sizeof(int),0);
+        r=sendAll(currentClient->clientfd,&menosuno,sizeof(int));
         Desbloquear();
         continue;
       }else{
-        r=send(currentClient->clientfd,&uno,sizeof(int),0);
+        r=sendAll(currentClient->clientfd,&uno,sizeof(int));
       
     EliminarMascota(numregistro-1);
     Desbloquear();
@@ -178,7 +178,7 @@ if(por_abrir!=NULL){free(por_abrir);}
       writelog(log);
       DesbloquearLog();
       //----->desbloquear log
-    r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
+    r=sendAll(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33);
   
       }
     
@@ -195,7 +195,7 @@ if(por_abrir!=NULL){free(por_abrir);}
         perror("erroren el malloc");
         exit(-1);
     } 
-    r=recv(currentClient->clientfd,nombre,sizeof(char)*33,0);
+    r=recvAll(currentClient->clientfd,nombre,sizeof(char)*33);
     //----->bloquear
     Bloquear();
     BuscarPorNombreyEnviaraCliente(nombre,0,currentClient->clientfd);
@@ -209,9 +209,9 @@ if(por_abrir!=NULL){free(por_abrir);}
       writelog(log);
       DesbloquearLog();
       /////------>desbloquear log
-     r=send(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33,0);
+     r=sendAll(currentClient->clientfd,mensaje_accion_realizada,sizeof(char)*33);
   }else {
-     r=send(currentClient->clientfd,mensaje_despedida,sizeof(char)*33,0);
+     r=sendAll(currentClient->clientfd,mensaje_despedida,sizeof(char)*33);
       ////----->bloquear
       Bloquear();
       CambiarTamanioBd(numero_mascotas);
@@ -323,7 +323,7 @@ numclientesactual++;
 struct cliente *currentClient=(struct cliente *)malloc(sizeof(struct cliente));
 currentClient->clientfd=clientfd;
 if(NumeroHiloDisponible()==-1){//no se pueden aceptar mas hilos 
-r=send(clientfd,mensaje_ocupado,sizeof(char)*15,0);
+r=sendAll(clientfd,mensaje_ocupado,sizeof(char)*15);
 if(r==-1){
   perror("error en send");
 }
