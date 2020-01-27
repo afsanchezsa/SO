@@ -22,7 +22,7 @@ int main(){
     }
     struct dogType *mascota=(struct dogType *)malloc(sizeof(struct dogType));
     int i;
-     for( i =0;i<10000000;i++){
+     for( i =0;i<1000000;i++){
         if(i%500000==0){
             printf("%i",i);
         }  
